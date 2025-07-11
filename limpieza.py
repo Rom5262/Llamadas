@@ -8,36 +8,34 @@ def procesar_datos_megaline():
     Retorna el DataFrame final procesado.
     """
     try:
-        calls_df = pd.read_csv('datos/megaline_calls.csv')
-        internet_df = pd.read_csv('datos/megaline_internet.csv')
-        messages_df = pd.read_csv('datos/megaline_messages.csv')
-        plans_df = pd.read_csv('datos/megaline_plans.csv') 
-        users_df = pd.read_csv('datos/megaline_users.csv')
+        calls = pd.read_csv('datos/megaline_calls.csv')
+        internet = pd.read_csv('datos/megaline_internet.csv')
+        messages = pd.read_csv('datos/megaline_messages.csv')
+        plans    = pd.read_csv('datos/megaline_plans.csv') 
+        users    = pd.read_csv('datos/megaline_users.csv')
 
         # --- PREPROCESAMIENTO DE FECHAS Y EXTRACCIÓN DE MESES ---
-        calls_df['call_date'] = pd.to_datetime(calls_df['call_date'])
-        calls_df['month'] = calls_df['call_date'].dt.to_period('M') 
+        calls['call_date'] = pd.to_datetime(calls['call_date'])
+        calls['month'] = calls['call_date'].dt.to_period('M') 
 
-        messages_df['message_date'] = pd.to_datetime(messages_df['message_date'])
-        messages_df['month'] = messages_df['message_date'].dt.to_period('M')
+        messages['message_date'] = pd.to_datetime(messages['message_date'])
+        messages['month'] = messages['message_date'].dt.to_period('M')
 
-        internet_df['session_date'] = pd.to_datetime(internet_df['session_date'])
-        internet_df['month'] = internet_df['session_date'].dt.to_period('M')
+        internet['session_date'] = pd.to_datetime(internet['session_date'])
+        internet['month'] = internet['session_date'].dt.to_period('M')
 
-        columns = ['plan_name'] + [col for col in plans_df.columns if col != 'plan_name']
-        plans_df = plans_df[columns]
-
+        
         # --- AGRUPACIONES Y UNIONES ---
-        group_calls = calls_df.groupby(['user_id', 'month']).agg(
+        group_calls = calls.groupby(['user_id', 'month']).agg(
             call_count=('call_date', 'count'),
             total_minutes=('duration', 'sum')
         ).reset_index()
 
-        group_messages = messages_df.groupby(['user_id', 'month']).agg(
+        group_messages = messages.groupby(['user_id', 'month']).agg(
             message_count=('message_date', 'count')
         ).reset_index()
         
-        group_internet = internet_df.groupby(['user_id', 'month']).agg(
+        group_internet = internet.groupby(['user_id', 'month']).agg(
             compil_internet=('mb_used', 'sum')
         ).reset_index()
 
@@ -55,8 +53,8 @@ def procesar_datos_megaline():
         monthly_data['message_count'] = monthly_data['message_count'].astype(int)
         
         # --- CONSTRUCCIÓN DE 'final_data' y cálculos extras ---
-        union_data = pd.merge(monthly_data, users_df, on='user_id', how='outer')
-        final_data = pd.merge(union_data, plans_df, left_on='plan_name', right_on='plan_name', how='left')
+        union_data = pd.merge(monthly_data, users, on='user_id', how='outer')
+        final_data = pd.merge(union_data, plans, left_on='plan_name', right_on='plan_name', how='left')
         
         # Renombrar columna para mayor claridad
         final_data = final_data.rename(columns={'plan_name': 'type_plan'})
