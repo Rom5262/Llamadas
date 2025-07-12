@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Se importa la función del archivo 'limpieza.py'
-from limpieza import procesar_datos_megaline
+from limpieza import procesar_datos
 
 # --- 
 @st.cache_data
 def load_data():
     """Carga los datos limpios y procesados."""
-    return procesar_datos_megaline()
+    return procesar_datos()
 
 # --- 
 st.set_page_config(
@@ -56,5 +56,4 @@ if final_data is not None:
     st.pyplot(fig)
 
     st.subheader("Datos de Promedio de Llamadas")
-    st.dataframe(pivot_data)
     
