@@ -2,19 +2,20 @@
 import pandas as pd
 import numpy as np
 
-def procesar_datos_megaline():
+def procesar_datos():
     """
     Carga, limpia y fusiona todos los DataFrames para el análisis.
     Retorna el DataFrame final procesado.
     """
     try:
-        calls = pd.read_csv('datos/megaline_calls.csv')
+        
+        calls    = pd.read_csv('datos/megaline_calls.csv')
         internet = pd.read_csv('datos/megaline_internet.csv')
         messages = pd.read_csv('datos/megaline_messages.csv')
         plans    = pd.read_csv('datos/megaline_plans.csv') 
         users    = pd.read_csv('datos/megaline_users.csv')
 
-        # --- PREPROCESAMIENTO DE FECHAS Y EXTRACCIÓN DE MESES ---
+        
         calls['call_date'] = pd.to_datetime(calls['call_date'])
         calls['month'] = calls['call_date'].dt.to_period('M') 
 
@@ -24,53 +25,51 @@ def procesar_datos_megaline():
         internet['session_date'] = pd.to_datetime(internet['session_date'])
         internet['month'] = internet['session_date'].dt.to_period('M')
 
-        
-        # --- AGRUPACIONES Y UNIONES ---
-        group_calls = calls.groupby(['user_id', 'month']).agg(
-            call_count=('call_date', 'count'),
-            total_minutes=('duration', 'sum')
-        ).reset_index()
+        users['reg_date'] = pd.to_datetime(users['reg_date'])
+        users['churn_date'] = pd.to_datetime(users['churn_date'])
+        users['period'] = users['reg_date'].dt.to_period('M')
 
-        group_messages = messages.groupby(['user_id', 'month']).agg(
-            message_count=('message_date', 'count')
-        ).reset_index()
         
-        group_internet = internet.groupby(['user_id', 'month']).agg(
-            compil_internet=('mb_used', 'sum')
-        ).reset_index()
+        data_group = users.groupby(['user_id', 'period']).agg({'first_name':'first','last_name': 'first','age': 'first', 'plan': 'first',}).reset_index()
 
-        # Fusionar datos de llamadas, mensajes e internet en un solo DataFrame
-        monthly_data = pd.merge(group_calls, group_messages, on=['user_id', 'month'], how='outer')
-        monthly_data = pd.merge(monthly_data, group_internet, on=['user_id', 'month'], how='outer')
+        group_calls = calls.groupby(['user_id', 'month']).agg(call_count=('call_date','count')).reset_index()
+        group_minutes = calls.groupby(['user_id', 'month']).agg(total_minutes=('duration', 'sum')).reset_index()
+        merged_data = pd.merge(group_calls, group_minutes, on=['user_id', 'month'],how='outer')
 
-        # --- APLICACIÓN DE fillna y astype(int) de forma más eficiente ---
-        monthly_data = monthly_data.fillna(0)
+        group_messages = messages.groupby(['user_id', 'month']).agg(message_count=('message_date', 'count')).reset_index()
+        merged_data_1 = pd.merge(merged_data, group_messages, on=['user_id', 'month'],how='outer')
+
+        group_internet = internet.groupby(['user_id', 'month']).agg(compil_internet = ('mb_used', 'sum')).reset_index()
+        merged_data_2 = pd.merge(merged_data_1, group_internet, on=['user_id','month'],how='outer')
+
         
-        # Redondea y convierte a entero en un solo paso para las columnas relevantes
-        monthly_data['total_minutes'] = np.ceil(monthly_data['total_minutes']).astype(int)
-        monthly_data['compil_internet'] = np.ceil(monthly_data['compil_internet']).astype(int)
-        monthly_data['call_count'] = monthly_data['call_count'].astype(int)
-        monthly_data['message_count'] = monthly_data['message_count'].astype(int)
+        merged_data_2 = merged_data_2.fillna(0) 
+        new_columns = ['call_count', 'total_minutes', 'message_count', 'compil_internet']
+        for col in new_columns:
+            merged_data_2[col] = merged_data_2[col].apply(np.ceil).astype(int)
+
         
-        # --- CONSTRUCCIÓN DE 'final_data' y cálculos extras ---
-        union_data = pd.merge(monthly_data, users, on='user_id', how='outer')
-        final_data = pd.merge(union_data, plans, left_on='plan_name', right_on='plan_name', how='left')
+        user_1 = users[['user_id','plan']]
+        union_data = pd.merge(merged_data_2, user_1, on='user_id', how='outer')
+
+        final_data = pd.merge(union_data, plans, left_on='plan', right_on='plan_name', how='left')
+
         
-        # Renombrar columna para mayor claridad
-        final_data = final_data.rename(columns={'plan_name': 'type_plan'})
+        final_data['type_plan'] = final_data.apply(lambda row: row['plan']
+                                                 if pd.notnull(row['plan']) else row['plan_name'], axis=1)
+
+        final_data.drop(columns=['plan', 'plan_name'], inplace=True)
+
         
-        # Calcular extra_charges
-        final_data['extra_minutes'] = (final_data['total_minutes'] - final_data['minutes_included']).clip(lower=0)
+        final_data['extra_calls'] = (final_data['total_minutes'] - final_data['minutes_included']).clip(lower=0)
         final_data['extra_texts'] = (final_data['message_count'] - final_data['messages_included']).clip(lower=0)
-        final_data['extra_data'] = (final_data['compil_internet'] - final_data['mb_per_month_included']).clip(lower=0)
-        
-        final_data['extra_charges'] = (final_data['extra_minutes'] * final_data['usd_per_minute'] +
+        final_data['extra_dates'] = (final_data['compil_internet'] - final_data['mb_per_month_included']).clip(lower=0)
+
+        final_data['extra_charges'] = (final_data['extra_calls'] * final_data['usd_per_minute'] +
                                        final_data['extra_texts'] * final_data['usd_per_message'] +
-                                       final_data['extra_data'] * final_data['usd_per_gb'])
+                                       final_data['extra_dates'] * final_data['usd_per_gb'])
 
-        final_data['month'] = final_data['month'].astype(str)
-
-        print("¡Datos de Megaline procesados con éxito!")
+        print("¡Datos de datos procesados con éxito!")
         return final_data
 
     except FileNotFoundError as e:

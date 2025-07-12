@@ -6,12 +6,13 @@ import seaborn as sns
 # Se importa la función del archivo 'limpieza.py'
 from limpieza import procesar_datos_megaline
 
-# --- La función con @st.cache_data es la forma correcta de cargar los datos una sola vez ---
+# --- 
 @st.cache_data
 def load_data():
+    """Carga los datos limpios y procesados."""
     return procesar_datos_megaline()
 
-# --- Configuración de la Página ---
+# --- 
 st.set_page_config(
     page_title="📱 Análisis del Uso del Tipo de Plan de Llamadas de MEGALINE ",
     layout="wide"
@@ -37,20 +38,23 @@ if final_data is not None:
     st.title('Análisis de Llamadas por Plan')
     st.markdown("---")
 
+    # Calcula el promedio de llamadas y lo pivota
     average_calls = final_data.groupby(['type_plan', 'month'])['call_count'].mean().reset_index()
     pivot_data = average_calls.pivot(index='month', columns='type_plan', values='call_count')
 
+    # Crea el gráfico de barras
     fig, ax = plt.subplots(figsize=(10, 6))
     pivot_data.plot(kind='bar', ax=ax)
 
-    # Configurar el gráfico
+    # Configura el gráfico
     plt.title("Comparación de Promedio Mensual de Llamadas por Plan")
     plt.xlabel("Mes")
     plt.ylabel("Promedio de Llamadas")
     plt.legend(title="Planes")
 
-    # --- Mostrar el gráfico en la aplicación de Streamlit ---
+    # --- Muestra el gráfico en la aplicación de Streamlit ---
     st.pyplot(fig)
 
     st.subheader("Datos de Promedio de Llamadas")
     st.dataframe(pivot_data)
+    
