@@ -41,11 +41,11 @@ def procesar_datos():
 
         group_internet = internet.groupby(['user_id', 'month']).agg(compil_internet = ('mb_used', 'sum')).reset_index()
         merged_data_2 = pd.merge(merged_data_1, group_internet, on=['user_id','month'],how='outer')
-        merged_data_2_fillned = merged_data_2.fillna(0) 
 
+        merged_data_2 = merged_data_2.fillna(0)
         new_columns = ['call_count', 'total_minutes', 'message_count', 'compil_internet']
         for col in new_columns:
-            merged_data_2[col] = merged_data_2[col].apply(np.ceil).astype(int)
+            merged_data_2[col] = np.ceil(merged_data_2[col]).astype(int)
 
         
         user_1 = users[['user_id','plan']]

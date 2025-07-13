@@ -55,6 +55,7 @@ if final_data is not None:
     # ---                                       ---
     st.pyplot(fig)
 
+
 st.markdown("---")
 st.title('Análisis de Minutos Mensuales Para Cada Plan')
 st.markdown("---")
@@ -125,7 +126,6 @@ for i, v in enumerate(valores):
 plt.tight_layout()
 st.pyplot(fig)
 
-
 st.title("Análisis de Llamadas por Plan")
 st.write("Comparación de la distribución de llamadas mensuales.")
 
@@ -176,7 +176,6 @@ with col2:
         st.title('MENSAJES')    
         st.markdown("---")
 
-
 number_messages = final_data.groupby(['type_plan', 'month'])['message_count'].mean().reset_index()
 pivot_messages = number_messages.pivot(index='month', columns='type_plan', values='message_count')
 
@@ -222,7 +221,6 @@ with st.container():
         st.title('INTERNET')    
         st.markdown("---")
 
-
 internet_traffic = final_data.groupby(['type_plan', 'month'])['compil_internet'].mean().reset_index()
 pivot_internet = internet_traffic.pivot(index='month', columns='type_plan', values='compil_internet')
 
@@ -263,7 +261,6 @@ with st.container():
         plt.tight_layout()
         
         st.pyplot(fig_bar)
-
 
 average_internet_use = final_data.groupby(['type_plan', 'month'])['compil_internet'].sum().reset_index()
 pivot_internet_sum = average_internet_use.pivot(index='month', columns='type_plan', values='compil_internet')
@@ -306,5 +303,6 @@ with st.container():
         
         st.pyplot(fig_bar)
 
-
        
+
+
