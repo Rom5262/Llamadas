@@ -344,6 +344,10 @@ with col2:
     plt.tight_layout()
     st.pyplot(fig_box)
 
+    st.markdown("---")
+    st.title('PLANES')    
+    st.markdown("---")
+
 
 st.title("Distribución de Minutos Totales por Tipo de Plan")
 st.write("Este gráfico muestra cómo varía la cantidad total de minutos entre los distintos planes mensualmente.")
