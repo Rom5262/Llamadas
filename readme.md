@@ -1,13 +1,15 @@
 # 📞 Proyecto: Llamadas
 ---
-## 📊 Análisis del comportamiento de uso de planes de llamadas móviles en Megaline
-Este proyecto analiza datos de Megaline, una empresa de telecomunicaciones que ofrece dos planes prepago de telefonía celular: Surf y Ultimate.
+## 📊 Análisis del comportamiento de uso de prepagos de llamadas móviles en Megaline
+---
+Este proyecto analiza datos de Megaline, una empresa de telecomunicaciones que ofrece dos plan´s prepago de telefonía celular: Surf y Ultimate.
 ---
 ## 🎯 Objetivo: Identificar qué plan genera más ingresos para optimizar el presupuesto de publicidad.
 ---
 ## 🔧 Herramientas utilizadas: Python, Pandas, NumPy, Matplotlib, Seaborn, Streamlit
 
 ## 🌐 Tablero Interactivo
+
 🧠 Desarrollado con Streamlit, este panel permite explorar el comportamiento de los usuarios en sus planes móviles, incluyendo:
 - 📞 Promedio de llamadas
 - ⏱️ Uso de minutos
