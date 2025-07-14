@@ -27,9 +27,12 @@ with st.expander("Introducción", expanded=True):
     * El Analisis de Llamadas por Plan
     * El Analisis de Mensajes por Cada Plan
     * El Analisis de La Cantidad de Trafico de Internet Consumido por Cada Plan
-    * """)
+    * El Analisis del Promedio Mensual de Uso de Internet para cada Plan
+    * El Analisis de Distribucion de Consumo de Internet de cada Plan
+    * El Analisis de la Distribución de Minutos Totales por Tipo de Plan
+     """)
 
-final_data = load_data()
+final_data = load_data()  ######
 
 st.markdown("---")
 st.title('LLAMADAS')    
@@ -68,9 +71,7 @@ with st.container():
 
     with col1:
         st.subheader("Gráfico Histograma")
-        # "
-        
-        # Crear la figura para el primer gráfico (Histograma)
+    
         fig_hist, ax_hist = plt.subplots(figsize=(10, 6))
         pivot_minutes.plot(kind='hist', ax=ax_hist)
         plt.xticks(rotation=45)
@@ -262,6 +263,7 @@ with st.container():
         
         st.pyplot(fig_bar)
 
+
 average_internet_use = final_data.groupby(['type_plan', 'month'])['compil_internet'].sum().reset_index()
 pivot_internet_sum = average_internet_use.pivot(index='month', columns='type_plan', values='compil_internet')
 
@@ -303,6 +305,66 @@ with st.container():
         
         st.pyplot(fig_bar)
 
-       
+
+st.title("Análisis de Distribución de Consumo de Internet")
+st.write("Comparación de distribuciones usando un histograma y un diagrama de caja.")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("Histograma del Consumo General")
+    fig_hist, ax_hist = plt.subplots(figsize=(8, 6))
+    
+    ax_hist.hist(final_data['compil_internet'], bins=20, color='skyblue', edgecolor='black')
+    ax_hist.set_title('Distribución Total de Consumo de Internet')
+    ax_hist.set_xlabel('Consumo (MB)')
+    ax_hist.set_ylabel('Frecuencia')
+    ax_hist.grid(axis='y', linestyle='--', alpha=0.5)
+
+    plt.tight_layout()
+    st.pyplot(fig_hist)
 
 
+with col2:
+    st.subheader("Diagrama de Caja por Plan")
+    fig_box, ax_box = plt.subplots(figsize=(8, 6))
+
+    sns.boxplot(
+        x='type_plan',
+        y='compil_internet',
+        data=final_data,
+        ax=ax_box,
+        palette='Set2'
+    )
+    ax_box.set_title('Distribución de Consumo de Internet por Plan')
+    ax_box.set_xlabel('Tipo de Plan')
+    ax_box.set_ylabel('Consumo (MB)')
+    ax_box.grid(axis='y', linestyle='--', alpha=0.5)
+
+    plt.tight_layout()
+    st.pyplot(fig_box)
+
+
+st.title("Distribución de Minutos Totales por Tipo de Plan")
+st.write("Este gráfico muestra cómo varía la cantidad total de minutos entre los distintos planes mensualmente.")
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+
+final_data.boxplot(
+    column='total_minutes',
+    by='type_plan',
+    ax=ax,
+    grid=False,
+    patch_artist=True
+)
+
+
+ax.set_title('Distribución de Minutos Totales por Tipo de Plan')
+plt.suptitle('')  
+ax.set_xlabel('Tipo de Plan')
+ax.set_ylabel('Minutos Totales')
+ax.grid(axis='y', linestyle='--', alpha=0.5)
+
+plt.tight_layout()
+st.pyplot(fig)
