@@ -32,74 +32,72 @@ with st.expander("Introducción", expanded=True):
     * El Analisis de la Distribución de Minutos Totales por Tipo de Plan
      """)
 
-final_data = load_data()  ######
+final_data = load_data()  
 
 st.markdown("---")
 st.title('LLAMADAS')    
 st.markdown("---")
 
 if final_data is not None:
-    st.markdown("---")
-    st.title('Análisis de Llamadas por Plan')
-    st.markdown("---")
+    with st.expander("", expanded=True):
+        st.markdown("---")
+        st.title('Análisis de Llamadas por Plan')
+        st.markdown("---")
 
-    average_calls = final_data.groupby(['type_plan', 'month'])['call_count'].mean().reset_index()
-    pivot_data = average_calls.pivot(index='month', columns='type_plan', values='call_count')
+        average_calls = final_data.groupby(['type_plan', 'month'])['call_count'].mean().reset_index()
+        pivot_data = average_calls.pivot(index='month', columns='type_plan', values='call_count')
 
-    fig, ax = plt.subplots(figsize=(8,6))
-    pivot_data.plot(kind='bar', ax=ax)
-    plt.xticks(rotation=45)
+        fig, ax = plt.subplots(figsize=(8,6))
+        pivot_data.plot(kind='bar', ax=ax)
+        plt.xticks(rotation=45)
 
-    plt.title("Comparación de Promedio Mensual de Llamadas por Plan")
-    plt.xlabel("Mes")
-    plt.ylabel("Promedio de Llamadas")
-    plt.legend(title="Planes")
+        plt.title("Comparación de Promedio Mensual de Llamadas por Plan")
+        plt.xlabel("Mes")
+        plt.ylabel("Promedio de Llamadas")
+        plt.legend(title="Planes")
 
-    # ---                                       ---
-    st.pyplot(fig)
+        st.pyplot(fig)
 
 
 st.markdown("---")
-st.title('Análisis de Minutos Mensuales Para Cada Plan')
-st.markdown("---")
 
-monthly_minutes = final_data.groupby(['type_plan', 'month'])['total_minutes'].mean().reset_index()
-pivot_minutes = monthly_minutes.pivot(index='month', columns='type_plan', values='total_minutes')
+if final_data is not None:
+    st.markdown("---")
 
-with st.container():
-    col1, col2 = st.columns(2)
+    with st.expander("", expanded=True):  # Aquí empieza el bloque ocultable
+        st.markdown("---")
+        st.title('Análisis de Minutos Mensuales Para Cada Plan')
+        st.markdown("---")
 
-    with col1:
-        st.subheader("Gráfico Histograma")
-    
-        fig_hist, ax_hist = plt.subplots(figsize=(10, 6))
-        pivot_minutes.plot(kind='hist', ax=ax_hist)
-        plt.xticks(rotation=45)
-        
-        ax_hist.set_title("Comparación de Minutos Mensuales por Plan")
-        ax_hist.set_xlabel("Mes")
-        ax_hist.set_ylabel("Total de Minutos")
-        ax_hist.legend(title="Planes")
-        
-        plt.tight_layout()
-        st.pyplot(fig_hist) 
+        monthly_minutes = final_data.groupby(['type_plan', 'month'])['total_minutes'].mean().reset_index()
+        pivot_minutes = monthly_minutes.pivot(index='month', columns='type_plan', values='total_minutes')
 
-    with col2:
-        st.subheader("Gráfico de Barras")
-        
+        col1, col2 = st.columns(2)
 
-        fig_bar, ax_bar = plt.subplots(figsize=(10, 6))
-        pivot_minutes.plot(kind='bar', ax=ax_bar)
-        plt.xticks(rotation=45)
+        with col1:
+            st.subheader("Gráfico Histograma")
+            fig_hist, ax_hist = plt.subplots(figsize=(10, 6))
+            pivot_minutes.plot(kind='hist', ax=ax_hist)
+            plt.xticks(rotation=45)
+            ax_hist.set_title("Comparación de Minutos Mensuales por Plan")
+            ax_hist.set_xlabel("Mes")
+            ax_hist.set_ylabel("Total de Minutos")
+            ax_hist.legend(title="Planes")
+            plt.tight_layout()
+            st.pyplot(fig_hist)
 
-        ax_bar.set_title("Comparación de Minutos Mensuales por Plan")
-        ax_bar.set_xlabel("Mes")
-        ax_bar.set_ylabel("Total de Minutos")
-        ax_bar.legend(title="Planes")
-        
-        plt.tight_layout()
-        st.pyplot(fig_bar) 
-
+        with col2:
+            st.subheader("Gráfico de Barras")
+            fig_bar, ax_bar = plt.subplots(figsize=(10, 6))
+            pivot_minutes.plot(kind='bar', ax=ax_bar)
+            plt.xticks(rotation=45)
+            ax_bar.set_title("Comparación de Minutos Mensuales por Plan")
+            ax_bar.set_xlabel("Mes")
+            ax_bar.set_ylabel("Total de Minutos")
+            ax_bar.legend(title="Planes")
+            plt.tight_layout()
+            st.pyplot(fig_bar)
+            
 
 st.markdown("---")
 st.title('Análisis de Media, Varianza y Desviación Estandar de la duración de Llamadas')
