@@ -39,9 +39,8 @@ st.title('LLAMADAS')
 st.markdown("---")
 
 if final_data is not None:
-    with st.expander("", expanded=True):
-        st.markdown("---")
-        st.title('Análisis de Llamadas por Plan')
+    with st.expander("Análisis de Llamadas por Plan", expanded=True):
+        st.title('')
         st.markdown("---")
 
         average_calls = final_data.groupby(['type_plan', 'month'])['call_count'].mean().reset_index()
@@ -62,12 +61,9 @@ if final_data is not None:
 st.markdown("---")
 
 if final_data is not None:
-    st.markdown("---")
-
-    with st.expander("", expanded=True):  # Aquí empieza el bloque ocultable
+    with st.expander("Análisis de Minutos Mensuales Para Cada Plan", expanded=True):  
         st.markdown("---")
-        st.title('Análisis de Minutos Mensuales Para Cada Plan')
-        st.markdown("---")
+        st.title('')
 
         monthly_minutes = final_data.groupby(['type_plan', 'month'])['total_minutes'].mean().reset_index()
         pivot_minutes = monthly_minutes.pivot(index='month', columns='type_plan', values='total_minutes')
@@ -98,32 +94,34 @@ if final_data is not None:
             plt.tight_layout()
             st.pyplot(fig_bar)
             
-
 st.markdown("---")
-st.title('Análisis de Media, Varianza y Desviación Estandar de la duración de Llamadas')
-st.markdown("---")
+if final_data is not None:
+    with st.expander("Análisis de Media, Varianza y Desviación Estandar de la duración de Llamadas", expanded=True):  
+        st.title('Estadisticas Descriptivas de las Llamadas')
+        st.markdown("---")
 
-mean_calls = final_data['call_count'].mean()
-var_calls = final_data['call_count'].var()
-std_dev_calls = final_data['call_count'].std() 
+        mean_calls = final_data['call_count'].mean()
+        var_calls = final_data['call_count'].var()
+        std_dev_calls = final_data['call_count'].std() 
 
-valores = [mean_calls, var_calls, std_dev_calls]
-etiquetas = ['Media', 'Varianza', 'Desv. Estándar']
-colores = ['skyblue', 'lightcoral', 'lightgreen']
+        valores = [mean_calls, var_calls, std_dev_calls]
+        etiquetas = ['Media', 'Varianza', 'Desv. Estándar']
+        colores = ['skyblue', 'lightcoral', 'lightgreen']
 
-fig, ax = plt.subplots(figsize=(8, 4))
+        fig, ax = plt.subplots(figsize=(8, 4))
 
-ax.bar(etiquetas, valores, color=colores)
-plt.xticks(rotation=0)
-ax.set_title('Media, Varianza y Desviación Estándar de las Llamadas')
-ax.set_ylabel('Valores')
-ax.grid(axis='y', linestyle='--', alpha=0.5)
+        ax.bar(etiquetas, valores, color=colores)
+        plt.xticks(rotation=0)
+        ax.set_title('Media, Varianza y Desviación Estándar de las Llamadas')
+        ax.set_ylabel('Valores')
+        ax.grid(axis='y', linestyle='--', alpha=0.5)
 
-for i, v in enumerate(valores):
-    ax.text(i, v + 0.5, f'{v:.2f}', ha='center', color='black', fontweight='bold')
+        for i, v in enumerate(valores):
+            ax.text(i, v + 0.5, f'{v:.2f}', ha='center', color='black', fontweight='bold')
 
-plt.tight_layout()
-st.pyplot(fig)
+        plt.tight_layout()
+        st.pyplot(fig)
+
 
 st.title("Análisis de Llamadas por Plan")
 st.write("Comparación de la distribución de llamadas mensuales.")
