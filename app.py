@@ -356,8 +356,7 @@ final_data.boxplot(
     by='type_plan',
     ax=ax,
     grid=False,
-    patch_artist=True
-)
+    patch_artist=True)
 
 
 ax.set_title('Distribución de Minutos Totales por Tipo de Plan')
